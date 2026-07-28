@@ -256,8 +256,9 @@ class QuranApp {
   async ensureFontLoaded(fontName) {
     if (!fontName || this.loadedFonts.has(fontName)) return;
 
-    // e.g., QCF4_Hafs_01 or QCF4_QBSML
-    const fontUrl = `/fonts-woff2/${fontName}.woff2`;
+    // QCF4_QBSML has no _W suffix; all Hafs fonts have _W suffix e.g., QCF4_Hafs_01_W.woff2
+    const fileName = fontName === "QCF4_QBSML" ? fontName : `${fontName}_W`;
+    const fontUrl = `/fonts-woff2/${fileName}.woff2`;
     const fontFace = new FontFace(fontName, `url(${fontUrl})`);
 
     try {
@@ -267,7 +268,7 @@ class QuranApp {
     } catch (err) {
       console.warn(`Could not load font WOFF2: ${fontName}, falling back to TTF`, err);
       try {
-        const ttfFace = new FontFace(fontName, `url(/fonts/${fontName}.ttf)`);
+        const ttfFace = new FontFace(fontName, `url(/fonts/${fileName}.ttf)`);
         const loadedTtf = await ttfFace.load();
         document.fonts.add(loadedTtf);
         this.loadedFonts.add(fontName);
