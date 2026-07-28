@@ -1,0 +1,13 @@
+{
+  "appId": "com.quran.app.adfree",
+  "appName": "القرآن الكريم",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  }
+}

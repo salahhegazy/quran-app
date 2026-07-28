@@ -1,0 +1,8 @@
+fonts/
+demo.html
+GITHUB-SETUP.md
+.git/
+.gitignore
+.gitattributes
+.github/
+*.log
