@@ -119,9 +119,9 @@ class QuranApp {
   }
 
   setupEventListeners() {
-    // Navigation (Swipe Right / Right Arrow = Next Page)
-    this.elements.btnNextPage.addEventListener('click', () => this.nextPage());
-    this.elements.btnPrevPage.addEventListener('click', () => this.prevPage());
+    // Navigation (Optional arrow button check)
+    if (this.elements.btnNextPage) this.elements.btnNextPage.addEventListener('click', () => this.nextPage());
+    if (this.elements.btnPrevPage) this.elements.btnPrevPage.addEventListener('click', () => this.prevPage());
     
     this.elements.pageSlider.addEventListener('input', (e) => {
       const page = parseInt(e.target.value, 10);
