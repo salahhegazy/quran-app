@@ -252,6 +252,25 @@ class QuranApp {
     });
   }
 
+  // --- Divine Name Detector (Allah, Rabb, Rabbana) ---
+  isDivineNameWord(text) {
+    if (!text) return false;
+    // Strip diacritics/tashkeel
+    const clean = text.replace(/[\u064B-\u065F\u0670\u0656\u06E1\u06DC\u06DF\u06E0\u06E2]/g, '').trim();
+
+    // Lafz Al-Jalalah variations (Allah, Lillah, Tallah, Wallah, Fallah, Billah, etc.)
+    if (/^(الله|لله|تالله|والله|فالله|بالله|ولله|فلله|اللهم|فاللهم|وللهم)$/.test(clean)) {
+      return true;
+    }
+
+    // Rabb / Rabbana / Rabbik / Rabbih / Rabbikum variations
+    if (/^(رب|ربنا|ربك|ربكم|ربه|ربهم|ربكما|ربهن|الرب|فربكم|وبربكم|فربك|بربكم|بربك|فربنا|وبربنا)$/.test(clean)) {
+      return true;
+    }
+
+    return false;
+  }
+
   // --- Dynamic Font Loader ---
   async ensureFontLoaded(fontName) {
     if (!fontName || this.loadedFonts.has(fontName)) return;
@@ -357,7 +376,10 @@ class QuranApp {
           } else {
             const verseKeyAttr = w.verse_key ? `data-verse-key="${w.verse_key}"` : '';
             const isEnd = w.type === 'verse_end';
-            const wordClass = isEnd ? 'quran-word word-verse-end' : 'quran-word';
+            const isAllah = this.isDivineNameWord(w.text || '');
+            let wordClass = 'quran-word';
+            if (isEnd) wordClass += ' word-verse-end';
+            if (isAllah) wordClass += ' word-allah-name';
 
             html += `
               <span class="${wordClass}" ${verseKeyAttr} style="font-family: '${fontName}', serif;" title="${w.text || ''}">

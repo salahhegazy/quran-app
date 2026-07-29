@@ -303,6 +303,11 @@ html, body {
   font-weight: bold;
 }
 
+.word-allah-name {
+  color: #dc2626 !important;
+  font-weight: bold;
+}
+
 /* Surah Header Banner */
 .surah-header-wrapper {
   width: 100%;
