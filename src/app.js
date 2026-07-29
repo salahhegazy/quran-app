@@ -255,8 +255,8 @@ class QuranApp {
   // --- Divine Name Detector (Allah, Rabb, Rabbana) ---
   isDivineNameWord(text) {
     if (!text) return false;
-    // Strip diacritics/tashkeel
-    const clean = text.replace(/[\u064B-\u065F\u0670\u0656\u06E1\u06DC\u06DF\u06E0\u06E2]/g, '').trim();
+    // Strip all Arabic diacritics & Quranic marks
+    const clean = text.replace(/[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06DC\u06DF-\u06E8\u06EA-\u06ED\u0671]/g, '').trim();
 
     // Lafz Al-Jalalah variations (Allah, Lillah, Tallah, Wallah, Fallah, Billah, etc.)
     if (/^(الله|لله|تالله|والله|فالله|بالله|ولله|فلله|اللهم|فاللهم|وللهم)$/.test(clean)) {
@@ -264,7 +264,7 @@ class QuranApp {
     }
 
     // Rabb / Rabbana / Rabbik / Rabbih / Rabbikum variations
-    if (/^(رب|ربنا|ربك|ربكم|ربه|ربهم|ربكما|ربهن|الرب|فربكم|وبربكم|فربك|بربكم|بربك|فربنا|وبربنا)$/.test(clean)) {
+    if (/^(رب|ربي|ربنا|ربك|ربكم|ربه|ربها|ربهم|ربكما|ربهما|الرب|فربك|فربكم|فربه|فربهم|فربنا|بربك|بربكم|بربه|بربهم|بربنا|وربك|وربكم|وربه|وربهم|وربنا)$/.test(clean)) {
       return true;
     }
 
@@ -366,10 +366,12 @@ class QuranApp {
               </div>
             `;
           } else if (w.type === 'bismillah') {
+            const bText = w.text || 'بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ';
+            const bHtml = bText.replace(/(اللَّهِ|اللَّهَ|اللَّهُ|اللَّهِ|الله)/g, '<span class="word-allah-name">$1</span>');
             html += `
               <div class="bismillah-wrapper">
-                <div class="bismillah-container" style="font-family: '${fontName}', serif;">
-                  ${w.char}
+                <div class="bismillah-container">
+                  ${bHtml}
                 </div>
               </div>
             `;
