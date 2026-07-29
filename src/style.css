@@ -286,7 +286,8 @@ html, body {
 
 .quran-word {
   display: inline-block;
-  font-size: clamp(0.85rem, min(3.2vh, 4.3vw), 1.8rem);
+  font-size: clamp(1rem, min(3.5vh, 4.8vw), 1.9rem);
+  font-weight: 700;
   padding: 0 0.5px;
   cursor: pointer;
   border-radius: 4px;
