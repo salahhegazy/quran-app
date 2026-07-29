@@ -286,12 +286,33 @@ html, body {
 
 .quran-word {
   display: inline-block;
-  font-size: clamp(1rem, min(3.5vh, 4.8vw), 1.9rem);
+  font-size: clamp(0.75rem, min(3.0vh, 3.7vw), 1.75rem);
   font-weight: 700;
   padding: 0 0.5px;
   cursor: pointer;
   border-radius: 4px;
   transition: color 0.15s, background 0.15s;
+}
+
+/* Header & Footer Toggle Fullscreen Mode */
+header.app-header {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+footer.app-footer {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+body.fullscreen-mode header.app-header {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+body.fullscreen-mode footer.app-footer {
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
 }
 
 .quran-word:hover, .quran-word.active-word {

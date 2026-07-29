@@ -142,11 +142,17 @@ class QuranApp {
       if (e.key === 'ArrowLeft') this.prevPage();
     });
 
-    // Touch Swipe Navigation (Swipe Right = Next Page)
+    // Touch Swipe Navigation & Tap Fullscreen Toggle
     let touchStartX = 0;
+    let touchMoved = false;
     const mushafEl = this.elements.mushafPage;
     mushafEl.addEventListener('touchstart', (e) => {
       touchStartX = e.changedTouches[0].screenX;
+      touchMoved = false;
+    }, { passive: true });
+
+    mushafEl.addEventListener('touchmove', () => {
+      touchMoved = true;
     }, { passive: true });
     
     mushafEl.addEventListener('touchend', (e) => {
@@ -155,6 +161,13 @@ class QuranApp {
       if (diff < -50) this.nextPage();
       else if (diff > 50) this.prevPage();
     }, { passive: true });
+
+    mushafEl.addEventListener('click', (e) => {
+      if (e.target.closest('.quran-word') || e.target.closest('.icon-btn')) return;
+      if (!touchMoved) {
+        document.body.classList.toggle('fullscreen-mode');
+      }
+    });
 
     // Modals Triggers
     this.elements.btnMenuSurah.addEventListener('click', () => this.openSurahIndex());
