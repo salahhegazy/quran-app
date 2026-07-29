@@ -332,9 +332,18 @@ class QuranApp {
           const fontName = w.font || pageData.font;
           
           if (w.type === 'surah_header') {
+            let sName = w.text ? w.text.replace(/سُورَةُ|سُورَة|سورة/g, '').trim() : '';
+            if (!sName && w.sura && this.indexData && this.indexData.chapters) {
+              const ch = this.indexData.chapters.find(c => c.id === w.sura);
+              if (ch) sName = ch.name_arabic;
+            }
+            if (!sName && firstSurah) sName = firstSurah.name_arabic;
+
             html += `
-              <div class="surah-header-banner">
-                <span>سورة ${w.text.replace('سُورَةُ', '').trim()}</span>
+              <div class="surah-header-wrapper">
+                <div class="surah-header-banner">
+                  <span>سورة ${sName}</span>
+                </div>
               </div>
             `;
           } else if (w.type === 'bismillah') {
