@@ -138,8 +138,8 @@ class QuranApp {
 
     // Keyboard Arrow Keys
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft') this.nextPage();
-      if (e.key === 'ArrowRight') this.prevPage();
+      if (e.key === 'ArrowRight') this.nextPage();
+      if (e.key === 'ArrowLeft') this.prevPage();
     });
 
     // Touch Swipe Navigation
@@ -152,8 +152,8 @@ class QuranApp {
     mushafEl.addEventListener('touchend', (e) => {
       const touchEndX = e.changedTouches[0].screenX;
       const diff = touchStartX - touchEndX;
-      if (diff > 50) this.nextPage();
-      else if (diff < -50) this.prevPage();
+      if (diff < -50) this.nextPage();
+      else if (diff > 50) this.prevPage();
     }, { passive: true });
 
     // Modals Triggers
