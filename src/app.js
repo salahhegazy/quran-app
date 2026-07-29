@@ -337,13 +337,6 @@ class QuranApp {
               const ch = this.indexData.chapters.find(c => c.id === w.sura);
               if (ch) sName = ch.name_arabic;
             }
-            if (!sName && w.text) {
-              sName = w.text
-                .replace(/بِسْمِ\s*اللَّهِ\s*الرَّحْمَنِ\s*الرَّحِيمِ/gi, '')
-                .replace(/بسم\s*الله\s*الرحمن\s*الرحيم/gi, '')
-                .replace(/سُورَةُ|سُورَة|سورة/gi, '')
-                .trim();
-            }
             if (!sName && firstSurah) sName = firstSurah.name_arabic;
 
             html += `
@@ -355,8 +348,10 @@ class QuranApp {
             `;
           } else if (w.type === 'bismillah') {
             html += `
-              <div class="bismillah-container" style="font-family: '${fontName}', serif;">
-                ${w.char}
+              <div class="bismillah-wrapper">
+                <div class="bismillah-container" style="font-family: '${fontName}', serif;">
+                  ${w.char}
+                </div>
               </div>
             `;
           } else {
