@@ -142,32 +142,38 @@ class QuranApp {
       if (e.key === 'ArrowLeft') this.prevPage();
     });
 
-    // Touch Swipe Navigation & Tap Fullscreen Toggle
+    // Touch Swipe Navigation & Single Tap Fullscreen Toggle
     let touchStartX = 0;
-    let touchMoved = false;
-    const mushafEl = this.elements.mushafPage;
-    mushafEl.addEventListener('touchstart', (e) => {
-      touchStartX = e.changedTouches[0].screenX;
-      touchMoved = false;
-    }, { passive: true });
-
-    mushafEl.addEventListener('touchmove', () => {
-      touchMoved = true;
-    }, { passive: true });
+    let touchStartY = 0;
+    const mainViewer = document.querySelector('.main-viewer') || this.elements.mushafPage;
     
-    mushafEl.addEventListener('touchend', (e) => {
-      const touchEndX = e.changedTouches[0].screenX;
-      const diff = touchStartX - touchEndX;
-      if (diff < -50) this.nextPage();
-      else if (diff > 50) this.prevPage();
-    }, { passive: true });
+    if (mainViewer) {
+      mainViewer.addEventListener('touchstart', (e) => {
+        if (e.touches && e.touches.length > 0) {
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+        }
+      }, { passive: true });
 
-    mushafEl.addEventListener('click', (e) => {
-      if (e.target.closest('.quran-word') || e.target.closest('.icon-btn')) return;
-      if (!touchMoved) {
-        document.body.classList.toggle('fullscreen-mode');
-      }
-    });
+      mainViewer.addEventListener('touchend', (e) => {
+        if (!e.changedTouches || e.changedTouches.length === 0) return;
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+        const deltaX = Math.abs(touchEndX - touchStartX);
+        const deltaY = Math.abs(touchEndY - touchStartY);
+
+        // Horizontal Swipe (> 40px movement): Page Navigation
+        if (deltaX > 40 && deltaX > deltaY) {
+          const diff = touchStartX - touchEndX;
+          if (diff < -40) this.nextPage();
+          else if (diff > 40) this.prevPage();
+        } 
+        // Single Tap (< 12px movement): Toggle Header & Footer Bars!
+        else if (deltaX < 12 && deltaY < 12) {
+          document.body.classList.toggle('fullscreen-mode');
+        }
+      }, { passive: true });
+    }
 
     // Modals Triggers
     this.elements.btnMenuSurah.addEventListener('click', () => this.openSurahIndex());
