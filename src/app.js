@@ -119,9 +119,9 @@ class QuranApp {
   }
 
   setupEventListeners() {
-    // Navigation (RTL Arabic Mushaf: Left Arrow / Swipe Left = Next Page)
-    this.elements.btnPrevPage.addEventListener('click', () => this.nextPage());
-    this.elements.btnNextPage.addEventListener('click', () => this.prevPage());
+    // Navigation (Swipe Right / Right Arrow = Next Page)
+    this.elements.btnNextPage.addEventListener('click', () => this.nextPage());
+    this.elements.btnPrevPage.addEventListener('click', () => this.prevPage());
     
     this.elements.pageSlider.addEventListener('input', (e) => {
       const page = parseInt(e.target.value, 10);
@@ -136,13 +136,13 @@ class QuranApp {
       if (p >= 1 && p <= 604) this.loadAndRenderPage(p);
     });
 
-    // Keyboard Arrow Keys (Left Arrow = Next Page)
+    // Keyboard Arrow Keys (Right Arrow = Next Page)
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft') this.nextPage();
-      if (e.key === 'ArrowRight') this.prevPage();
+      if (e.key === 'ArrowRight') this.nextPage();
+      if (e.key === 'ArrowLeft') this.prevPage();
     });
 
-    // Touch Swipe Navigation (Swipe Left = Next Page)
+    // Touch Swipe Navigation (Swipe Right = Next Page)
     let touchStartX = 0;
     const mushafEl = this.elements.mushafPage;
     mushafEl.addEventListener('touchstart', (e) => {
@@ -152,8 +152,8 @@ class QuranApp {
     mushafEl.addEventListener('touchend', (e) => {
       const touchEndX = e.changedTouches[0].screenX;
       const diff = touchStartX - touchEndX;
-      if (diff > 50) this.nextPage();
-      else if (diff < -50) this.prevPage();
+      if (diff < -50) this.nextPage();
+      else if (diff > 50) this.prevPage();
     }, { passive: true });
 
     // Modals Triggers
