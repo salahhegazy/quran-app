@@ -332,10 +332,17 @@ class QuranApp {
           const fontName = w.font || pageData.font;
           
           if (w.type === 'surah_header') {
-            let sName = w.text ? w.text.replace(/سُورَةُ|سُورَة|سورة/g, '').trim() : '';
-            if (!sName && w.sura && this.indexData && this.indexData.chapters) {
+            let sName = '';
+            if (w.sura && this.indexData && this.indexData.chapters) {
               const ch = this.indexData.chapters.find(c => c.id === w.sura);
               if (ch) sName = ch.name_arabic;
+            }
+            if (!sName && w.text) {
+              sName = w.text
+                .replace(/بِسْمِ\s*اللَّهِ\s*الرَّحْمَنِ\s*الرَّحِيمِ/gi, '')
+                .replace(/بسم\s*الله\s*الرحمن\s*الرحيم/gi, '')
+                .replace(/سُورَةُ|سُورَة|سورة/gi, '')
+                .trim();
             }
             if (!sName && firstSurah) sName = firstSurah.name_arabic;
 
