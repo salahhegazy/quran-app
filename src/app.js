@@ -21,8 +21,9 @@ class QuranApp {
     this.selectedVerseKey = null;
     this.selectedWordElement = null;
 
-    // Bookmarks
+    // Bookmarks & Interaction State
     this.bookmarks = JSON.parse(localStorage.getItem('quran_bookmarks') || '[]');
+    this.ignoreSingleTapToggle = false;
 
     this.init();
   }
@@ -170,13 +171,21 @@ class QuranApp {
         } 
         // Single Tap (< 12px movement): Toggle Header & Footer Bars!
         else if (deltaX < 12 && deltaY < 12) {
+          if (this.ignoreSingleTapToggle) {
+            this.ignoreSingleTapToggle = false;
+            return;
+          }
           document.body.classList.toggle('fullscreen-mode');
         }
       }, { passive: true });
 
       // Mouse / Desktop single click toggle
       mainViewer.addEventListener('click', (e) => {
-        if (e.target.closest('.quran-word') || e.target.closest('button') || e.target.closest('input') || e.target.closest('.icon-btn')) return;
+        if (e.target.closest('button') || e.target.closest('input') || e.target.closest('.icon-btn') || e.target.closest('.modal')) return;
+        if (this.ignoreSingleTapToggle) {
+          this.ignoreSingleTapToggle = false;
+          return;
+        }
         document.body.classList.toggle('fullscreen-mode');
       });
     }
@@ -275,6 +284,13 @@ class QuranApp {
         this.renderTafsirTab(e.target.dataset.tab);
       });
     });
+
+    // Auto-fit responsive listener on window resize & container resize
+    window.addEventListener('resize', () => this.autoFitPage());
+    if (window.ResizeObserver && this.elements.mushafPage) {
+      const ro = new ResizeObserver(() => this.autoFitPage());
+      ro.observe(this.elements.mushafPage);
+    }
   }
 
   // --- Divine Name Detector (Allah, Rabb, Rabbana) ---
@@ -430,14 +446,14 @@ class QuranApp {
 
       this.elements.mushafPage.innerHTML = html;
 
-      // Attach word/verse click listeners
-      this.elements.mushafPage.querySelectorAll('.quran-word[data-verse-key]').forEach(wEl => {
-        wEl.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const verseKey = wEl.dataset.verseKey;
-          this.openVerseActionSheet(verseKey, wEl);
-        });
-      });
+      // Attach word long-press listeners for verse actions
+      this.attachWordLongPressListeners();
+
+      // Dynamic Auto-Fit Calculation Engine for perfect fitting without letter clipping
+      this.autoFitPage();
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(() => this.autoFitPage());
+      }
 
     } catch (err) {
       console.error(`Error rendering page ${pageNum}:`, err);
@@ -447,6 +463,131 @@ class QuranApp {
         </div>
       `;
     }
+  }
+
+  // --- Dynamic Auto-Fit Engine for Small Screens ---
+  autoFitPage() {
+    const pageEl = this.elements.mushafPage;
+    if (!pageEl) return;
+    const container = pageEl.querySelector('.page-lines-container');
+    if (!container) return;
+
+    // Reset styles to measure natural dimensions
+    container.style.removeProperty('--quran-font-size');
+    container.style.removeProperty('--quran-line-gap');
+    const lines = container.querySelectorAll('.quran-line');
+    lines.forEach(line => {
+      line.style.transform = '';
+      line.style.transformOrigin = '';
+    });
+
+    // Schedule measurement after browser DOM layout pass
+    requestAnimationFrame(() => {
+      const containerWidth = container.clientWidth;
+      const containerHeight = container.clientHeight;
+      if (containerWidth <= 0 || containerHeight <= 0) return;
+
+      // 1. Height overflow check
+      const totalHeight = container.scrollHeight;
+      let heightRatio = 1;
+      if (totalHeight > containerHeight) {
+        heightRatio = containerHeight / totalHeight;
+      }
+
+      // 2. Max horizontal width overflow check
+      let maxLineWidth = 0;
+      lines.forEach(line => {
+        if (line.scrollWidth > maxLineWidth) {
+          maxLineWidth = line.scrollWidth;
+        }
+      });
+
+      let widthRatio = 1;
+      if (maxLineWidth > containerWidth) {
+        widthRatio = containerWidth / maxLineWidth;
+      }
+
+      const overallRatio = Math.min(heightRatio, widthRatio);
+
+      // If page content overflows either dimension, scale font size
+      if (overallRatio < 0.99) {
+        const firstWord = container.querySelector('.quran-word');
+        const computedFont = parseFloat(window.getComputedStyle(firstWord || container).fontSize) || 20;
+        const targetFontSize = Math.max(7, Math.floor(computedFont * overallRatio * 0.96 * 10) / 10);
+        container.style.setProperty('--quran-font-size', `${targetFontSize}px`);
+        if (containerWidth < 380) {
+          container.style.setProperty('--quran-line-gap', '1px');
+        }
+      }
+
+      // 3. Precision check: scale individual outlier lines if font metrics slightly vary per line
+      requestAnimationFrame(() => {
+        const cWidth = container.clientWidth;
+        lines.forEach(line => {
+          if (line.scrollWidth > cWidth + 1) {
+            const lineScale = Math.floor((cWidth / line.scrollWidth) * 0.96 * 100) / 100;
+            line.style.transform = `scale(${lineScale})`;
+            line.style.transformOrigin = 'center center';
+          }
+        });
+      });
+    });
+  }
+
+  // --- Long Press Word Listener (Opens Verse Actions on Press & Hold) ---
+  attachWordLongPressListeners() {
+    const wordEls = this.elements.mushafPage.querySelectorAll('.quran-word[data-verse-key]');
+
+    wordEls.forEach(wEl => {
+      let pressTimer = null;
+      let startX = 0;
+      let startY = 0;
+
+      const startPress = (e) => {
+        const clientX = e.touches && e.touches.length > 0 ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches && e.touches.length > 0 ? e.touches[0].clientY : e.clientY;
+        startX = clientX;
+        startY = clientY;
+
+        if (pressTimer) clearTimeout(pressTimer);
+
+        pressTimer = setTimeout(() => {
+          this.ignoreSingleTapToggle = true; // Prevent single tap toggle of header & footer
+          if (navigator.vibrate) {
+            try { navigator.vibrate(45); } catch (_) {}
+          }
+          const verseKey = wEl.dataset.verseKey;
+          this.openVerseActionSheet(verseKey, wEl);
+          pressTimer = null;
+        }, 400); // 400ms hold threshold
+      };
+
+      const cancelPress = () => {
+        if (pressTimer) {
+          clearTimeout(pressTimer);
+          pressTimer = null;
+        }
+      };
+
+      const movePress = (e) => {
+        if (!pressTimer) return;
+        const clientX = e.touches && e.touches.length > 0 ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches && e.touches.length > 0 ? e.touches[0].clientY : e.clientY;
+        if (Math.abs(clientX - startX) > 10 || Math.abs(clientY - startY) > 10) {
+          cancelPress();
+        }
+      };
+
+      wEl.addEventListener('touchstart', startPress, { passive: true });
+      wEl.addEventListener('touchmove', movePress, { passive: true });
+      wEl.addEventListener('touchend', cancelPress, { passive: true });
+      wEl.addEventListener('touchcancel', cancelPress, { passive: true });
+
+      wEl.addEventListener('mousedown', startPress);
+      wEl.addEventListener('mousemove', movePress);
+      wEl.addEventListener('mouseup', cancelPress);
+      wEl.addEventListener('mouseleave', cancelPress);
+    });
   }
 
   nextPage() {
@@ -567,16 +708,31 @@ class QuranApp {
     this.openModal(this.elements.modalVerseAction);
   }
 
+  getReciterFolder(reciterId) {
+    const map = {
+      'ar.alafasy': 'Alafasy_128kbps',
+      'ar.abdulbasitmurattal': 'Abdul_Basit_Murattal_192kbps',
+      'ar.minshawi': 'Minshawy_Murattal_128kbps',
+      'ar.husary': 'Husary_128kbps',
+      'ar.saoodshuraym': 'Saood_ash-Shuraym_128kbps',
+      'ar.ghamadi': 'Ghamadi_40kbps',
+      'ar.mahermuaiqly': 'MaherAlMuaiqly128kbps',
+      'ar.sudais': 'Abdurrahmaan_As-Sudais_192kbps',
+      'ar.hudhaify': 'Hudhaify_128kbps',
+      'ar.ayyoub': 'Muhammad_Ayyoub_128kbps'
+    };
+    return map[reciterId] || 'Alafasy_128kbps';
+  }
+
   playAyahAudio(verseKey) {
     if (!verseKey) return;
     const [s, v] = verseKey.split(':').map(Number);
     this.currentAudioAyah = { surah: s, verse: v, verseKey };
 
-    // Format for audio CDN e.g., https://cdn.islamic.network/quran/audio/128/ar.alafasy/{verse_number}.mp3
-    // Or standard Alafasy verse key e.g., 001001.mp3
     const sStr = s.toString().padStart(3, '0');
     const vStr = v.toString().padStart(3, '0');
-    const audioUrl = `https://everyayah.com/data/Alafasy_128kbps/${sStr}${vStr}.mp3`;
+    const folder = this.getReciterFolder(this.currentReciter);
+    const audioUrl = `https://everyayah.com/data/${folder}/${sStr}${vStr}.mp3`;
 
     this.audioElement.src = audioUrl;
     this.audioElement.play().then(() => {
