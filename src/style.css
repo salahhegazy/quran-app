@@ -248,11 +248,13 @@ html, body {
   display: flex;
   justify-content: space-between;
   font-family: 'Amiri', serif;
-  font-size: clamp(0.75rem, 1.6vh, 0.95rem);
+  font-size: clamp(0.68rem, 1.3vh, 0.82rem);
   color: var(--gold);
   border-bottom: 1px solid var(--paper-border);
-  padding-bottom: 2px;
-  margin-bottom: 2px;
+  padding-bottom: 1px;
+  margin-bottom: 1px;
+  flex-shrink: 0;
+  line-height: 1.1;
 }
 
 .page-lines-container {
@@ -273,46 +275,57 @@ html, body {
   justify-content: space-between;
   align-items: center;
   white-space: nowrap;
-  line-height: 1.05;
+  line-height: 1;
   min-height: 0;
   width: 100%;
   max-width: 100%;
   cursor: pointer;
   border-radius: 4px;
-  padding: 0 2px;
+  padding: 0 1px;
   transition: background 0.15s;
   box-sizing: border-box;
+  gap: clamp(1px, 0.5vw, 6px);
+}
+
+.quran-line.short-line, .quran-line.header-bismillah-line {
+  justify-content: center;
+  gap: clamp(4px, 1.2vw, 14px);
 }
 
 .quran-word {
   display: inline-block;
-  font-size: clamp(0.75rem, min(3.0vh, 3.7vw), 1.75rem);
-  font-weight: 700;
+  font-size: clamp(1rem, min(3.8vh, 4.3vw), 1.85rem);
+  font-weight: 600;
   padding: 0 0.5px;
   cursor: pointer;
   border-radius: 4px;
   transition: color 0.15s, background 0.15s;
+  line-height: 1;
 }
 
 /* Header & Footer Toggle Fullscreen Mode */
-header.app-header {
-  transition: transform 0.3s ease, opacity 0.3s ease;
+.top-bar, .bottom-bar {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, max-height 0.3s ease, padding 0.3s ease;
+  overflow: hidden;
+  max-height: 100px;
 }
 
-footer.app-footer {
-  transition: transform 0.3s ease, opacity 0.3s ease;
-}
-
-body.fullscreen-mode header.app-header {
+body.fullscreen-mode .top-bar {
   transform: translateY(-100%);
   opacity: 0;
   pointer-events: none;
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
-body.fullscreen-mode footer.app-footer {
+body.fullscreen-mode .bottom-bar {
   transform: translateY(100%);
   opacity: 0;
   pointer-events: none;
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .quran-word:hover, .quran-word.active-word {
@@ -379,11 +392,13 @@ body.fullscreen-mode footer.app-footer {
   display: flex;
   justify-content: center;
   font-family: 'Amiri', serif;
-  font-size: 0.9rem;
+  font-size: clamp(0.68rem, 1.3vh, 0.82rem);
   color: var(--gold);
   border-top: 1px solid var(--paper-border);
-  padding-top: 4px;
-  margin-top: 6px;
+  padding-top: 1px;
+  margin-top: 1px;
+  flex-shrink: 0;
+  line-height: 1.1;
 }
 
 /* Loading Spinner */

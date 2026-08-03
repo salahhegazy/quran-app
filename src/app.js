@@ -173,6 +173,12 @@ class QuranApp {
           document.body.classList.toggle('fullscreen-mode');
         }
       }, { passive: true });
+
+      // Mouse / Desktop single click toggle
+      mainViewer.addEventListener('click', (e) => {
+        if (e.target.closest('.quran-word') || e.target.closest('button') || e.target.closest('input') || e.target.closest('.icon-btn')) return;
+        document.body.classList.toggle('fullscreen-mode');
+      });
     }
 
     // Modals Triggers
@@ -365,7 +371,10 @@ class QuranApp {
       `;
 
       pageData.lines.forEach(line => {
-        html += `<div class="quran-line">`;
+        const isSpecialLine = line.words.some(w => w.type === 'surah_header' || w.type === 'bismillah');
+        const isShortLine = line.words && line.words.length <= 4 && !isSpecialLine;
+        const lineClass = isShortLine ? 'quran-line short-line' : (isSpecialLine ? 'quran-line header-bismillah-line' : 'quran-line');
+        html += `<div class="${lineClass}">`;
         line.words.forEach(w => {
           const fontName = w.font || pageData.font;
           
