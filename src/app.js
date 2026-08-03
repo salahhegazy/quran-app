@@ -146,6 +146,7 @@ class QuranApp {
     // Touch Swipe Navigation & Single Tap Fullscreen Toggle
     let touchStartX = 0;
     let touchStartY = 0;
+    let isTouchTap = false;
     const mainViewer = document.querySelector('.main-viewer') || this.elements.mushafPage;
     
     if (mainViewer) {
@@ -171,16 +172,20 @@ class QuranApp {
         } 
         // Single Tap (< 12px movement): Toggle Header & Footer Bars!
         else if (deltaX < 12 && deltaY < 12) {
+          isTouchTap = true;
+          setTimeout(() => { isTouchTap = false; }, 400);
+
           if (this.ignoreSingleTapToggle) {
             this.ignoreSingleTapToggle = false;
             return;
           }
           document.body.classList.toggle('fullscreen-mode');
         }
-      }, { passive: true });
+      });
 
-      // Mouse / Desktop single click toggle
+      // Mouse / Desktop single click toggle (skipped if touch tap already handled it)
       mainViewer.addEventListener('click', (e) => {
+        if (isTouchTap) return;
         if (e.target.closest('button') || e.target.closest('input') || e.target.closest('.icon-btn') || e.target.closest('.modal')) return;
         if (this.ignoreSingleTapToggle) {
           this.ignoreSingleTapToggle = false;
